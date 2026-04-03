@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Adobe Premiere | Rush + Pro 2026</title>
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Favicon (логотип Premiere) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%239999ff'/%3E%3Cpath fill='%23ffffff' d='M50,20 L80,80 L20,80 Z'/%3E%3Ctext x='50' y='75' font-size='40' text-anchor='middle' fill='white' font-family='Arial'%3EPR%3C/text%3E%3C/svg%3E">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+        }
+
+        /* Canvas для анимированного фона (частицы) */
+        #particles-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            pointer-events: none;
+            background: #1a1a1a;
+        }
+
+        body {
+            background-color: transparent;
+            color: #f5f5f5;
+            padding: 2rem 1.5rem;
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* шапка */
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ffffff 0%, #bbbbbb 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.5px;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            margin-top: 0.8rem;
+            color: #cccccc;
+            font-size: 1.1rem;
+            border-top: 1px solid #333;
+            display: inline-block;
+            padding-top: 0.6rem;
+        }
+
+        .password-badge {
+            background: rgba(42, 42, 42, 0.85);
+            backdrop-filter: blur(4px);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.4rem 1.2rem;
+            border-radius: 40px;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #f0f0f0;
+            border: 1px solid #555;
+        }
+
+        .password-badge i {
+            font-size: 1rem;
+            color: #ffd966;
+        }
+
+        .password-badge span {
+            color: #ffd966;
+            font-weight: bold;
+            background: #2c2c2c;
+            padding: 0.2rem 0.7rem;
+            border-radius: 30px;
+            margin-left: 0.3rem;
+            font-family: monospace;
+            font-size: 1rem;
+        }
+
+        /* сетка для двух карточек */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+
+        /* карточка программы */
+        .card {
+            background: rgba(36, 36, 36, 0.92);
+            backdrop-filter: blur(2px);
+            border-radius: 1.5rem;
+            overflow: hidden;
+            transition: transform 0.25s ease, box-shadow 0.3s ease;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+            border: 1px solid #444;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 18px 30px rgba(0, 0, 0, 0.6);
+            border-color: #6a6a6a;
+            background: rgba(40, 40, 40, 0.96);
+        }
+
+        /* аватар (лого) */
+        .avatar {
+            background: rgba(31, 31, 31, 0.7);
+            padding: 1.5rem 1rem;
+            text-align: center;
+            border-bottom: 1px solid #3a3a3a;
+            min-height: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .avatar img {
+            max-width: 100px;
+            max-height: 100px;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5));
+        }
+
+        .program-name {
+            font-weight: 700;
+            font-size: 1.5rem;
+            padding: 1rem 1rem 0.25rem 1rem;
+            line-height: 1.3;
+            color: #ffffff;
+            word-break: break-word;
+            text-align: center;
+        }
+
+        .version {
+            font-size: 0.8rem;
+            color: #aaa;
+            padding: 0 1rem;
+            margin-bottom: 0.8rem;
+            text-align: center;
+        }
+
+        /* группа кнопок */
+        .button-group {
+            display: flex;
+            gap: 0.8rem;
+            padding: 0.5rem 1rem 1.5rem 1rem;
+            margin-top: auto;
+        }
+
+        .btn-download, .btn-seller {
+            flex: 1;
+            border: none;
+            padding: 0.75rem 0;
+            border-radius: 2rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+        }
+
+        .btn-download {
+            background: #2c2c2c;
+            color: white;
+            border: 1px solid #3e3e3e;
+        }
+
+        .btn-download i {
+            font-size: 1rem;
+        }
+
+        .btn-download:hover {
+            background: #3a3a3a;
+            border-color: #5f5f5f;
+            transform: scale(0.98);
+        }
+
+        .btn-seller {
+            background: #2a2a2a;
+            color: #aaa;
+            border: 1px solid #444;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .btn-seller i {
+            font-size: 0.9rem;
+            color: #bbb;
+        }
+
+        .footer-note {
+            margin-top: 3rem;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #8a8a8a;
+            border-top: 1px solid #2c2c2c;
+            padding-top: 1.8rem;
+        }
+
+        @media (max-width: 700px) {
+            body {
+                padding: 1rem;
+            }
+            .header h1 {
+                font-size: 2rem;
+            }
+            .grid {
+                gap: 1.2rem;
+            }
+            .program-name {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="particles-canvas"></canvas>
+
+<div class="container">
+    <div class="header">
+        <h1>Adobe Premiere | Профессиональный монтаж</h1>
+        <p>Только две лучшие программы для видеомонтажа</p><br>
+        <div class="password-badge">
+            <i class="fas fa-lock"></i> Пароль от всех архивов: <span>1progs</span>
+        </div>
+		 <div class="password-badge">
+            <i class="fas fa-user-circle"></i> Продавец: <span>ShizzyBoost</span>
+        </div>
+    </div>
+
+    <div class="grid" id="adobeGrid"></div>
+    <div class="footer-note">
+        ⚡ Нажмите «Скачать» — архив защищён паролем <strong>1progs</strong><br>
+    </div>
+</div>
+
+<script>
+    // -------------------  АНИМИРОВАННЫЙ ФОН (ЧАСТИЦЫ) -------------------
+    const canvas = document.getElementById('particles-canvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    let particleCount = 100;
+    let mouseX = null, mouseY = null;
+    const mouseRadius = 120;
+
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+
+    class Particle {
+        constructor() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.size = Math.random() * 3 + 1.2;
+            this.speedX = (Math.random() - 0.5) * 0.8;
+            this.speedY = (Math.random() - 0.5) * 0.8;
+            this.color = `rgba(255, 255, 255, ${Math.random() * 0.5 + 0.2})`;
+            this.originalSpeedX = this.speedX;
+            this.originalSpeedY = this.speedY;
+        }
+        update() {
+            this.x += this.speedX;
+            this.y += this.speedY;
+            if (this.x < 0) { this.x = 0; this.speedX = -this.speedX; }
+            if (this.x > canvas.width) { this.x = canvas.width; this.speedX = -this.speedX; }
+            if (this.y < 0) { this.y = 0; this.speedY = -this.speedY; }
+            if (this.y > canvas.height) { this.y = canvas.height; this.speedY = -this.speedY; }
+            
+            if (mouseX !== null && mouseY !== null) {
+                const dx = this.x - mouseX;
+                const dy = this.y - mouseY;
+                const distance = Math.hypot(dx, dy);
+                if (distance < mouseRadius) {
+                    const angle = Math.atan2(dy, dx);
+                    const force = (mouseRadius - distance) / mouseRadius;
+                    const pushX = Math.cos(angle) * force * 1.2;
+                    const pushY = Math.sin(angle) * force * 1.2;
+                    this.x += pushX;
+                    this.y += pushY;
+                    this.speedX += pushX * 0.1;
+                    this.speedY += pushY * 0.1;
+                    const maxSpeed = 2;
+                    this.speedX = Math.min(maxSpeed, Math.max(-maxSpeed, this.speedX));
+                    this.speedY = Math.min(maxSpeed, Math.max(-maxSpeed, this.speedY));
+                } else {
+                    this.speedX += (this.originalSpeedX - this.speedX) * 0.02;
+                    this.speedY += (this.originalSpeedY - this.speedY) * 0.02;
+                }
+            } else {
+                this.speedX += (this.originalSpeedX - this.speedX) * 0.02;
+                this.speedY += (this.originalSpeedY - this.speedY) * 0.02;
+            }
+        }
+        draw() {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fillStyle = this.color;
+            ctx.fill();
+            if (this.size > 2.5) {
+                ctx.shadowBlur = 6;
+                ctx.shadowColor = "rgba(255,200,100,0.6)";
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+        }
+    }
+
+    function initParticles() {
+        particles = [];
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
+    }
+
+    function animateParticles() {
+        if (!ctx) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "rgba(26, 26, 26, 0.18)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        for (let p of particles) {
+            p.update();
+            p.draw();
+        }
+        ctx.beginPath();
+        ctx.strokeStyle = "rgba(255,255,200,0.12)";
+        ctx.lineWidth = 0.6;
+        for (let i = 0; i < particles.length; i++) {
+            for (let j = i + 1; j < particles.length; j++) {
+                const dist = Math.hypot(particles[i].x - particles[j].x, particles[i].y - particles[j].y);
+                if (dist < 110) {
+                    ctx.beginPath();
+                    ctx.moveTo(particles[i].x, particles[i].y);
+                    ctx.lineTo(particles[j].x, particles[j].y);
+                    ctx.stroke();
+                }
+            }
+        }
+        requestAnimationFrame(animateParticles);
+    }
+
+    function handleMouseMove(e) { mouseX = e.clientX; mouseY = e.clientY; }
+    function handleMouseLeave() { mouseX = null; mouseY = null; }
+    window.addEventListener('resize', () => { resizeCanvas(); initParticles(); });
+    canvas.addEventListener('mousemove', handleMouseMove);
+    canvas.addEventListener('mouseleave', handleMouseLeave);
+    resizeCanvas();
+    initParticles();
+    animateParticles();
+
+    // -------------------  ДАННЫЕ ПРОГРАММ (ТОЛЬКО ДВЕ) -------------------
+    // Здесь вы можете задать свои ссылки для скачивания и свои картинки (avatarUrl)
+    // Если avatarUrl оставить пустой строкой, будет сгенерирован стильный SVG-аватар на основе названия.
+    const programsData = [
+        { 
+            name: "Adobe Premiere Rush", 
+            downloadUrl: "https://cloud.mail.ru/public/VrKn/ove5qDpqW",   // замените на реальную ссылку скачивания
+            avatarUrl: "https://static.vecteezy.com/system/resources/previews/055/138/419/large_2x/adobe-premiere-rush-logo-square-rounded-adobe-premiere-rush-logo-adobe-premiere-rush-logo-free-download-free-png.png"       // укажите URL картинки, например "https://example.com/rush-logo.png"
+        },
+        { 
+            name: "Adobe Premiere Pro 2026", 
+            downloadUrl: "https://cloud.mail.ru/public/EaCc/6riBRh7RT",   // замените на реальную ссылку
+            avatarUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Adobe_Premiere_Pro_CC_2026_icon.svg/1200px-Adobe_Premiere_Pro_CC_2026_icon.svg.png" 
+        }
+    ];
+
+    // Функция генерации fallback-аватарки (SVG) если avatarUrl не указан
+    function generateFallbackAvatar(programName) {
+        let nameClean = programName.replace(/Adobe /g, '').replace(/[0-9]/g, '').trim();
+        let initials = nameClean.substring(0, 2).toUpperCase();
+        if (initials.length === 1) initials += nameClean.substring(1,2).toUpperCase() || "R";
+        if (initials.length < 2) initials = "PR";
+        let hash = 0;
+        for (let i = 0; i < programName.length; i++) {
+            hash = ((hash << 5) - hash) + programName.charCodeAt(i);
+            hash |= 0;
+        }
+        const hue = Math.abs(hash % 360);
+        const bgColor = `hsl(${hue}, 70%, 28%)`;
+        const accentColor = `hsl(${hue}, 85%, 60%)`;
+        const svgString = `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="90" height="90">
+            <defs><linearGradient id="grad_${hash}" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="${bgColor}" />
+                <stop offset="100%" stop-color="${accentColor}" />
+            </linearGradient></defs>
+            <rect width="100" height="100" rx="22" fill="url(#grad_${hash})" />
+            <text x="50" y="58" font-size="44" font-family="Arial, sans-serif" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">${initials}</text>
+            <polygon points="20,82 30,58 42,58 32,82" fill="rgba(255,255,240,0.35)" />
+            <polygon points="60,82 70,58 82,58 72,82" fill="rgba(255,215,0,0.45)" />
+            <circle cx="75" cy="30" r="8" fill="rgba(255,255,255,0.3)" />
+        </svg>`;
+        return `data:image/svg+xml,${encodeURIComponent(svgString)}`;
+    }
+
+    // Рендер карточек (только две)
+    const gridContainer = document.getElementById('adobeGrid');
+
+    function renderCards() {
+        programsData.forEach(prog => {
+            const program = prog.name;
+            let versionText = "";
+            if (program.includes("Rush")) versionText = "Быстрый монтаж • Пароль: 1progs";
+            else if (program.includes("Pro 2026")) versionText = "Профессиональная версия • Пароль: 1progs";
+            else versionText = "Latest";
+
+            // Определяем URL аватарки
+            let avatarUrl = (prog.avatarUrl && prog.avatarUrl.trim() !== "") ? prog.avatarUrl : generateFallbackAvatar(program);
+            
+            const card = document.createElement('div');
+            card.className = 'card';
+            
+            // Аватар
+            const avatarDiv = document.createElement('div');
+            avatarDiv.className = 'avatar';
+            const img = document.createElement('img');
+            img.src = avatarUrl;
+            img.alt = `${program} logo`;
+            img.style.objectFit = "contain";
+            img.onerror = () => {
+                if (img.src !== generateFallbackAvatar(program)) {
+                    img.src = generateFallbackAvatar(program);
+                }
+            };
+            avatarDiv.appendChild(img);
+            
+            // Название
+            const nameDiv = document.createElement('div');
+            nameDiv.className = 'program-name';
+            nameDiv.textContent = program;
+            
+            // Версия
+            const versionDiv = document.createElement('div');
+            versionDiv.className = 'version';
+            versionDiv.textContent = versionText;
+            
+            // Группа кнопок
+            const buttonGroup = document.createElement('div');
+            buttonGroup.className = 'button-group';
+            
+            // Кнопка СКАЧАТЬ (активная)
+            const downloadBtn = document.createElement('button');
+            downloadBtn.className = 'btn-download';
+            downloadBtn.innerHTML = `<i class="fas fa-download"></i> Скачать`;
+            downloadBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const url = prog.downloadUrl;
+                if (url && url !== "#") {
+                    window.open(url, '_blank');
+                } else {
+                    alert(`🔗 Ссылка для "${program}" пока не добавлена.\nУкажите downloadUrl в массиве programsData.`);
+                }
+            });
+            
+            // Неактивная кнопка "Продавец: MarinaWinner"
+            const sellerBtn = document.createElement('button');
+            sellerBtn.className = 'btn-seller';
+            sellerBtn.disabled = true;
+            sellerBtn.innerHTML = `<i class="fas fa-lock"></i> Пароль: 1progs`;
+            
+            buttonGroup.appendChild(downloadBtn);
+            buttonGroup.appendChild(sellerBtn);
+            
+            card.appendChild(avatarDiv);
+            card.appendChild(nameDiv);
+            card.appendChild(versionDiv);
+            card.appendChild(buttonGroup);
+            
+            gridContainer.appendChild(card);
+        });
+    }
+    
+    renderCards();
+</script>
+</body>
+</html>
